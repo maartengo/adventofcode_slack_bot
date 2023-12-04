@@ -35,17 +35,17 @@ else {
     [bool]$send_slack_message = [bool]::Parse($send_slack_message)
 }
 
+Write-Info ""
+Write-Info "leaderboard: $leaderboard"
+Write-Info "year: $year"
+Write-Info "live_refresh: $live_refresh"
+Write-Info "timeout_seconds: $timeout_seconds"
+Write-Info "send_slack_message: $send_slack_message"
 if ($debug) {
-    Write-Info ""
     Write-Info "session: $session"
     Write-Info "webhook: $webhook"
-    Write-Info "leaderboard: $leaderboard"
-    Write-Info "year: $year"
-    Write-Info "live_refresh: $live_refresh"
-    Write-Info "timeout_seconds: $timeout_seconds"
-    Write-Info "send_slack_message: $send_slack_message"
-    Write-Info ""
 }
+Write-Info ""
 
 #endregion
 
@@ -115,7 +115,15 @@ $codeblock = "``````"
 $live = [bool]::Parse($live_refresh)
 $timeout = [int]::Parse($timeout_seconds)
 $timeout = [math]::max(900, $timeout) # 15 minutes, the minimum refresh rate
-$leaderboardTime = '5:00'
+$leaderboardTimes = @('5:00', '11:01')
+$timeoutInMinutes = [math]::round($timeout / 60)
+
+$minutesToWait = $timeoutInMinutes - ((Get-Date).minute % $timeoutInMinutes)
+if ($timeoutInMinutes -gt $minutesToWait) {
+    Write-Info "Waiting $minutesToWait minutes so we start at a rounded number of minutes"
+    Start-Sleep ($minutesToWait * 60 - (Get-Date).second)
+    Write-Info "Continue..."
+}
 
 [datetime]$epoch = '1970-01-01 00:00:00'
 $specialScores = @{
@@ -134,7 +142,7 @@ while ($true) {
         date         = $content.date
     }
 
-    $content = Get-Leaderboard -CallApi ($live ) -Year $year -Session $session -LeaderboardId $leaderboard
+    $content = Get-Leaderboard -CallApi $live -Year $year -Session $session -LeaderboardId $leaderboard
 
     $members = Get-ObjectValues $content.members | Sort-Object -Descending -Property local_score
     $participants = $members  | Where-Object { $_.local_score -gt 0 } 
@@ -163,9 +171,12 @@ while ($true) {
     }
 
     $now = Get-Date
-    $leaderBoardRefresh = [datetime]::parse($leaderboardTime).ToLocalTime()
-    if($now -lt $leaderBoardRefresh -and ($now.AddSeconds($timeout) -gt $leaderBoardRefresh)) {
-        Send-SlackMessage Get-ScoreBoard
+    foreach ($leaderboardTime in $leaderboardTimes) {
+        $leaderBoardRefresh = [datetime]::parse($leaderboardTime).ToLocalTime()
+        if ($now -lt $leaderBoardRefresh -and ($now.AddSeconds($timeout) -gt $leaderBoardRefresh)) {
+            Send-SlackMessage (Get-ScoreBoard)
+            break
+        }
     }
 
     # $gainedStars = @(@{ name = "", day = 1, part = 1, time = 10:32 })
@@ -221,6 +232,7 @@ while ($true) {
     }
 
     [System.gc]::Collect()
-    Write-Info "Sleeping for $timeout seconds... next check at $("{0:yyyy/MM/dd} {0:HH:mm:ss}" -f (Get-Date).AddSeconds($timeout).ToLocalTime())"
-    Start-Sleep -Seconds $timeout
+    $interval = ($timeout - (Get-Date).Second % $timeout)
+    Write-Info "Sleeping for $timeout seconds... next check at $("{0:yyyy/MM/dd} {0:HH:mm:ss}" -f (Get-Date).AddSeconds($interval).ToLocalTime())"
+    Start-Sleep -Seconds $interval
 }
