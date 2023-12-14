@@ -70,7 +70,7 @@ function Get-Leaderboard($CallApi, $Year, $Session, $LeaderboardId) {
     if ($CallApi) {
         Write-Info "Refreshing data..."
         $url = "https://adventofcode.com/$Year/leaderboard/private/view/$LeaderboardId.json"
-        $response = Invoke-WebRequest -Method Get -Uri $url -UserAgent "PowerShell Slack-Integration (<your-email>) - homebrew script" -Headers @{ "Cookie" = "session=$Session" }
+        $response = Invoke-WebRequest -Method Get -Uri $url -UserAgent "PowerShell Slack-Integration (<your-email>) - https://github.com/maartengo/adventofcode_slack_bot" -Headers @{ "Cookie" = "session=$Session" }
         Set-Content -Value $response.Content -Path .\result.json -Encoding utf8BOM
     }
     else {
