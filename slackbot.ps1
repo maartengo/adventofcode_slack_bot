@@ -4,6 +4,7 @@
     [string]$leaderboard = $ENV:AOC_LEADERBOARD_ID,
     [string]$live_refresh = $ENV:AOC_REFRESH_DATA, # default false
     [string]$timeout_seconds = $ENV:AOC_REFRESH_RATE_SECONDS,
+    [string]$send_leaderboard_update = $ENV:AOC_SEND_LEADERBOARD_STATE, # default true
     [string]$webhook = $ENV:SLACK_WEBHOOK,
     [string]$send_slack_message = $ENV:SLACK_SEND_MESSAGE, # default false
     [string]$debug = $ENV:SCRIPT_DEBUG # default false
@@ -33,6 +34,13 @@ if ([string]::IsNullOrEmpty($send_slack_message)) {
 }
 else {
     [bool]$send_slack_message = [bool]::Parse($send_slack_message)
+}
+
+if ([string]::IsNullOrEmpty($send_leaderboard_update)) {
+    [bool]$send_leaderboard_update = $true
+}
+else {
+    [bool]$send_leaderboard_update = [bool]::Parse($send_leaderboard_update)
 }
 
 Write-Info ""
@@ -115,7 +123,8 @@ $codeblock = "``````"
 $live = [bool]::Parse($live_refresh)
 $timeout = [int]::Parse($timeout_seconds)
 $timeout = [math]::max(900, $timeout) # 15 minutes, the minimum refresh rate
-$leaderboardTimes = @('5:00', '11:01')
+# $leaderboardTimes = @('5:00', '11:01') # post at 5:45 and 12:00 CET
+$leaderboardTimes = @('11:01')
 $timeoutInMinutes = [math]::round($timeout / 60)
 
 $minutesToWait = $timeoutInMinutes - ((Get-Date).minute % $timeoutInMinutes)
@@ -133,6 +142,7 @@ $specialScores = @{
     "_last" = "💐"
 }
 
+$anyUpdate = $false
 $init = $true
 while ($true) {
     $previous = @{
@@ -170,13 +180,16 @@ while ($true) {
         }
     }
 
-    $now = Get-Date
-    foreach ($leaderboardTime in $leaderboardTimes) {
-        $leaderBoardRefresh = [datetime]::parse($leaderboardTime).ToLocalTime()
-        if ($now -lt $leaderBoardRefresh -and ($now.AddSeconds($timeout) -gt $leaderBoardRefresh)) {
-            Send-SlackMessage (Get-ScoreBoard)
-            break
+    if ($send_leaderboard_update -and $anyUpdate) {
+        $now = Get-Date
+        foreach ($leaderboardTime in $leaderboardTimes) {
+            $leaderBoardRefresh = [datetime]::parse($leaderboardTime).ToLocalTime()
+            if ($now -lt $leaderBoardRefresh -and ($now.AddSeconds($timeout) -gt $leaderBoardRefresh)) {
+                Send-SlackMessage (Get-ScoreBoard)
+                break
+            }
         }
+        $anyUpdate = $false
     }
 
     # $gainedStars = @(@{ name = "", day = 1, part = 1, time = 10:32 })
@@ -213,6 +226,7 @@ while ($true) {
     }
 
     if ($gainedStars.Length -gt 0) {
+        $anyUpdate = $true
         $message = @()
         $gainedStars | Sort-Object -Property time | ForEach-Object {
             $gained = $_
