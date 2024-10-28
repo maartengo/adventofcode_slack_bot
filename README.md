@@ -20,6 +20,7 @@ In order to run this bot, you need to create a Slack app:
 ```plaintext
 docker run  -e AOC_YEAR=2024 \ # defaults to current year
             -e AOC_SESSION_COOKIE="" \ # your session cookie from the AOC website (without the session= part)
+            -e EMAIL="<your email>" \ # used in the user-agent to identify the bot
             -e AOC_LEADERBOARD_ID="" \
             -e AOC_REFRESH_DATA=true \ # enables calling the AOC API
             -e AOC_REFRESH_RATE_SECONDS="900" \ # how often to call the AOC API, default is 15 minutes
