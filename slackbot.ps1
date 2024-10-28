@@ -6,6 +6,7 @@ param(
     [string]$timeout_seconds = $ENV:AOC_REFRESH_RATE_SECONDS,
     [string]$send_leaderboard_update = $ENV:AOC_SEND_LEADERBOARD_STATE, # default true
     [string]$webhook = $ENV:SLACK_WEBHOOK,
+    [string]$email = $ENV:EMAIL,
     [string]$send_slack_message = $ENV:SLACK_SEND_MESSAGE, # default false
     [string]$debug = $ENV:SCRIPT_DEBUG # default false
 )
@@ -110,7 +111,7 @@ function Get-Leaderboard($CallApi, $Year, $Session, $LeaderboardId) {
     if ($CallApi) {
         Write-Info "Refreshing data..."
         $url = "https://adventofcode.com/$Year/leaderboard/private/view/$LeaderboardId.json"
-        $response = Invoke-WebRequest -Method Get -Uri $url -UserAgent "PowerShell Slack-Integration (<your-email>) - https://github.com/maartengo/adventofcode_slack_bot" -Headers @{ "Cookie" = "session=$Session" }
+        $response = Invoke-WebRequest -Method Get -Uri $url -UserAgent "PowerShell Slack-Integration ($email) (https://github.com/maartengo/adventofcode_slack_bot)" -Headers @{ "Cookie" = "session=$Session" }
         Set-Content -Value $response.Content -Path .\result.json -Encoding utf8BOM
     }
     else {
