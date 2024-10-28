@@ -272,17 +272,17 @@ while ($true) {
 
     if ($gainedStars.Length -gt 0) {
         $anyUpdate = $true
-        $message = @()
+        $message = [System.Collections.ArrayList]::new()
         $gainedStars | Sort-Object -Property time | ForEach-Object {
             $gained = $_
             $paddedName = $gained.name.PadRight($namePadding)
             $paddedDay = "$($gained.day)".PadRight(2)
             $paddedPart = $gained.part -eq "1" ? "1️⃣" : "2️⃣"
             $paddedTime = "{0:HH:mm:ss}" -f $epoch.AddSeconds($gained.time).ToLocalTime()
-            $message += "$paddedName won a ⭐ for day $paddedDay part $paddedPart at $paddedTime 🎉"
+            $message.Add("$paddedName won a ⭐ for day $paddedDay part $paddedPart at $paddedTime 🎉")
         }
         # Messages can only be 55 lines long
-        for ($i = 0; $i * 50 -lt $message.Length; $i++) {
+        for ($i = 0; $i * 50 -lt $message.Count; $i++) {
             $text = $message | Select-Object -Skip ($i * 50) -First 50
             $text = $text -join "`n"
             $text = "$codeblock`n$text`n$codeblock"
