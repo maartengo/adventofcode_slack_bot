@@ -62,6 +62,34 @@ Write-Info ""
 #endregion
 
 #region Functions
+function Format-TimeSpan($Duration){
+    # http://stackoverflow.com/questions/61431951/ddg#61432373
+    $Day = switch ($Duration.Days) {
+        0 { $null; break }
+        1 { "{0} Day," -f $Duration.Days; break }
+        Default {"{0} Days," -f $Duration.Days}
+    }
+    
+    $Hour = switch ($Duration.Hours) {
+        #0 { $null; break }
+        1 { "{0} Hour," -f $Duration.Hours; break }
+        Default { "{0} Hours," -f $Duration.Hours }
+    }
+    
+    $Minute = switch ($Duration.Minutes) {
+        #0 { $null; break }
+        1 { "{0} Minute," -f $Duration.Minutes; break }
+        Default { "{0} Minutes," -f $Duration.Minutes }
+    }
+    
+    $Second = switch ($Duration.Seconds) {
+        #0 { $null; break }
+        1 { "{0} Second" -f $Duration.Seconds; break }
+        Default { "{0} Seconds" -f $Duration.Seconds }
+    }
+    
+    return "$Day $Hour $Minute $Second"
+}
 function Add-Property($Object, $Name, $Value) {
     $Object | Add-Member -MemberType NoteProperty -Name $Name -Value $Value -Force
 }
@@ -130,6 +158,18 @@ $timeout = [math]::max(900, $timeout) # 15 minutes, the minimum refresh rate
 # $leaderboardTimes = @('5:00', '11:01') # post at 5:45 and 12:00 CET
 $leaderboardTimes = @('11:01')
 $timeoutInMinutes = [math]::round($timeout / 60)
+
+# Wait until AOC starts
+$utcNow = (Get-Date).ToUniversalTime()
+if($year -eq $utcNow.Year -and $utcNow.Month -ne 12) {
+    $startOfAOC = (Get-Date -Date "$year-12-01 05:00:00Z")
+    $secondsUntilDecember = ($startOfAOC - $utcNow).TotalSeconds
+    Write-Info "Sleeping $(Format-TimeSpan ($startOfAOC - $utcNow)) until 1 December $year..."
+    while($secondsUntilDecember -gt 0) {
+        Start-Sleep -Seconds ([math]::min($secondsUntilDecember, 2147483))
+        $secondsUntilDecember = $secondsUntilDecember - 2147483
+    }
+}
 
 $minutesToWait = $timeoutInMinutes - ((Get-Date).minute % $timeoutInMinutes)
 if ($timeoutInMinutes -gt $minutesToWait) {
