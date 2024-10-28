@@ -1,4 +1,4 @@
-param(
+﻿param(
     [string]$year = $ENV:AOC_YEAR,
     [string]$session = $ENV:AOC_SESSION_COOKIE,
     [string]$leaderboard = $ENV:AOC_LEADERBOARD_ID,
@@ -156,8 +156,8 @@ $codeblock = "``````"
 $live = [bool]::Parse($live_refresh)
 $timeout = [int]::Parse($timeout_seconds)
 $timeout = [math]::max(900, $timeout) # 15 minutes, the minimum refresh rate
-# $leaderboardTimes = @('5:00', '11:01') # post at 5:45 and 12:00 CET
-$leaderboardTimes = @('11:01')
+$leaderboardTimes = @('5:00', '11:01') # post at 5:45 and 12:00 CET
+# $leaderboardTimes = @('11:01')
 $timeoutInMinutes = [math]::round($timeout / 60)
 
 # Wait until AOC starts
@@ -184,7 +184,6 @@ $specialScores = @{
     "1"     = "🥇"
     "2"     = "🥈"
     "3"     = "🥉"
-    "_last" = "💐"
 }
 
 $anyUpdate = $false
@@ -241,7 +240,7 @@ while ($true) {
     $gainedStars = @()
 
     if ($debug) {
-        $previous.participants = $null
+        # $previous.participants = $null
     }
 
     foreach ($participant in $participants) {
@@ -287,6 +286,7 @@ while ($true) {
             $text = $text -join "`n"
             $text = "$codeblock`n$text`n$codeblock"
             Send-SlackMessage $text
+            Start-Sleep -Seconds 0.5
         }
     }
 
