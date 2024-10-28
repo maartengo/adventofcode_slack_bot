@@ -1,4 +1,4 @@
-﻿param(
+param(
     [string]$year = $ENV:AOC_YEAR,
     [string]$session = $ENV:AOC_SESSION_COOKIE,
     [string]$leaderboard = $ENV:AOC_LEADERBOARD_ID,
@@ -41,6 +41,10 @@ if ([string]::IsNullOrEmpty($send_leaderboard_update)) {
 }
 else {
     [bool]$send_leaderboard_update = [bool]::Parse($send_leaderboard_update)
+}
+
+if ([string]::IsNullOrEmpty($year)) {
+    $year = (Get-Date).Year
 }
 
 Write-Info ""
