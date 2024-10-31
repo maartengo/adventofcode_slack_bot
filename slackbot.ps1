@@ -163,7 +163,7 @@ $timeoutInMinutes = [math]::round($timeout / 60)
 # Wait until AOC starts
 $utcNow = (Get-Date).ToUniversalTime()
 if($year -eq $utcNow.Year -and $utcNow.Month -ne 12) {
-    $startOfAOC = (Get-Date -Date "$year-12-01 05:00:00Z")
+    $startOfAOC = (Get-Date -Date "$year-12-01 05:00:00Z").ToUniversalTime()
     $secondsUntilDecember = ($startOfAOC - $utcNow).TotalSeconds
     Write-Info "Sleeping $(Format-TimeSpan ($startOfAOC - $utcNow)) until 1 December $year..."
     while($secondsUntilDecember -gt 0) {
