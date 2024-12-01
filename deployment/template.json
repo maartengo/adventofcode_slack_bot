@@ -1,0 +1,178 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "availabilityZones": {
+            "type": "Array"
+        },
+        "location": {
+            "type": "String"
+        },
+        "containerName": {
+            "type": "String"
+        },
+        "imageType": {
+            "allowedValues": [
+                "Public",
+                "Private"
+            ],
+            "type": "String"
+        },
+        "imageName": {
+            "type": "String"
+        },
+        "osType": {
+            "allowedValues": [
+                "Linux",
+                "Windows"
+            ],
+            "type": "String"
+        },
+        "numberCpuCores": {
+            "type": "String"
+        },
+        "memory": {
+            "type": "String"
+        },
+        "restartPolicy": {
+            "allowedValues": [
+                "OnFailure",
+                "Always",
+                "Never"
+            ],
+            "type": "String"
+        },
+        "sku": {
+            "allowedValues": [
+                "Standard",
+                "Confidential"
+            ],
+            "type": "String"
+        },
+        "imageRegistryLoginServer": {
+            "type": "String"
+        },
+        "imageUsername": {
+            "type": "String"
+        },
+        "imagePassword": {
+            "type": "SecureString"
+        },
+        "Year": {
+            "type": "String"
+        },
+        "cookie": {
+            "type": "String"
+        },
+        "leaderboardId": {
+            "type": "String"
+        },
+        "refreshData": {
+            "type": "String"
+        },
+        "refreshRateInSeconds": {
+            "type": "String"
+        },
+        "slackWebhookUrl": {
+            "type": "String"
+        },
+        "sendMessagesToSlack": {
+            "type": "String"
+        },
+        "debug": {
+            "type": "String"
+        },
+        "email": {
+            "type": "String"
+        },
+        "ipAddressType": {
+            "type": "String"
+        },
+        "ports": {
+            "type": "Array"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.ContainerInstance/containerGroups",
+            "apiVersion": "2022-10-01-preview",
+            "name": "[parameters('containerName')]",
+            "location": "[parameters('location')]",
+            "tags": {},
+            "zones": "[parameters('availabilityZones')]",
+            "properties": {
+                "containers": [
+                    {
+                        "name": "[parameters('containerName')]",
+                        "properties": {
+                            "image": "[parameters('imageName')]",
+                            "resources": {
+                                "requests": {
+                                    "cpu": "[int(parameters('numberCpuCores'))]",
+                                    "memoryInGB": "[float(parameters('memory'))]"
+                                }
+                            },
+                            "environmentVariables": [
+                                {
+                                    "name": "AOC_YEAR",
+                                    "value": "[parameters('Year')]"
+                                },
+                                {
+                                    "name": "AOC_SESSION_COOKIE",
+                                    "value": "[parameters('cookie')]"
+                                },
+                                {
+                                    "name": "AOC_LEADERBOARD_ID",
+                                    "value": "[parameters('leaderboardId')]"
+                                },
+                                {
+                                    "name": "AOC_REFRESH_DATA",
+                                    "value": "[parameters('refreshData')]"
+                                },
+                                {
+                                    "name": "AOC_REFRESH_RATE_SECONDS",
+                                    "value": "[parameters('refreshRateInSeconds')]"
+                                },
+                                {
+                                    "name": "SLACK_WEBHOOK",
+                                    "value": "[parameters('slackWebhookUrl')]"
+                                },
+                                {
+                                    "name": "SLACK_SEND_MESSAGE",
+                                    "value": "[parameters('sendMessagesToSlack')]"
+                                },
+                                {
+                                    "name": "SCRIPT_DEBUG",
+                                    "value": "[parameters('debug')]"
+                                },
+                                {
+                                    "name": "EMAIL",
+                                    "value": "[parameters('email')]"
+                                },
+                                {
+                                    "name": "AOC_SEND_LEADERBOARD_STATE",
+                                    "value": "true"
+                                }
+                            ],
+                            "ports": "[parameters('ports')]"
+                        }
+                    }
+                ],
+                "restartPolicy": "[parameters('restartPolicy')]",
+                "osType": "[parameters('osType')]",
+                "sku": "[parameters('sku')]",
+                "imageRegistryCredentials": [
+                    {
+                        "server": "[parameters('imageRegistryLoginServer')]",
+                        "username": "[parameters('imageUsername')]",
+                        "password": "[parameters('imagePassword')]"
+                    }
+                ],
+                "ipAddress": {
+                    "type": "[parameters('ipAddressType')]",
+                    "ports": "[parameters('ports')]"
+                }
+            }
+        }
+    ]
+}

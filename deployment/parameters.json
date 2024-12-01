@@ -1,0 +1,83 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "availabilityZones": {
+      "value": []
+    },
+    "location": {
+      "value": "westeurope"
+    },
+    "containerName": {
+      "value": "aocpowershell"
+    },
+    "imageType": {
+      "value": "Private"
+    },
+    "imageName": {
+      "value": "<acr-name>.azurecr.io/aoc_bot:latest"
+    },
+    "osType": {
+      "value": "Linux"
+    },
+    "numberCpuCores": {
+      "value": "1"
+    },
+    "memory": {
+      "value": "1.5"
+    },
+    "restartPolicy": {
+      "value": "OnFailure"
+    },
+    "sku": {
+      "value": "Standard"
+    },
+    "imageRegistryLoginServer": {
+      "value": "<acr-name>.azurecr.io"
+    },
+    "imageUsername": {
+      "value": "<acr-name>"
+    },
+    "imagePassword": {
+      "value": null
+    },
+    "Year": {
+      "value": "2024"
+    },
+    "cookie": {
+      "value": "..."
+    },
+    "leaderboardId": {
+      "value": "1529083"
+    },
+    "refreshData": {
+      "value": "true"
+    },
+    "refreshRateInSeconds": {
+      "value": "900"
+    },
+    "slackWebhookUrl": {
+      "value": "https://hooks.slack.com/services/.../.../..."
+    },
+    "sendMessagesToSlack": {
+      "value": "true"
+    },
+    "debug": {
+      "value": "false"
+    },
+    "email": {
+      "value": "your@email.com"
+    },
+    "ipAddressType": {
+      "value": "Public"
+    },
+    "ports": {
+      "value": [
+        {
+          "port": "80",
+          "protocol": "TCP"
+        }
+      ]
+    }
+  }
+}
