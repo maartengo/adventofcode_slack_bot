@@ -4,6 +4,10 @@ This repository contains a Slack bot that was inspired by <https://github.com/1g
 
 It posts a message to Slack each time someone gains a ⭐. It also posts a daily overview of the leaderboard.
 
+![overview of a leaderboard in Slack](images/leaderboard.png)
+
+![message when someone gains a star](images/partial-winnings.png)
+
 ## Setup
 
 In order to run this bot, you need to create a Slack app:
