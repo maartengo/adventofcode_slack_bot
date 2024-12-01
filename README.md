@@ -19,7 +19,17 @@ In order to run this bot, you need to create a Slack app:
 - Select incoming webhooks and activate it.
 - Click "Add new webhook to your workspace" and select a channel to which you want to- receive messages.
 
+### Build the bot
+
+Run the `build.ps1` script to build the docker image.
+
+```powershell
+ ./build.ps1 -registry 'example.azurecr.io' -tag '2024-12-01-v1'
+ ```
+
 ### Configure the bot
+
+You can configure the bot locally using environment variables:
 
 ```plaintext
 docker run  -e AOC_YEAR=2024 \ # defaults to current year
@@ -32,3 +42,5 @@ docker run  -e AOC_YEAR=2024 \ # defaults to current year
             -e SLACK_SEND_MESSAGE=true \
             aoc_bot
 ```
+
+Or by using the ARM tempaltes in the `deployment` folder.
