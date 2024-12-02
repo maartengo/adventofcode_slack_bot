@@ -186,7 +186,6 @@ $specialScores = @{
     "3"     = "🥉"
 }
 
-$anyUpdate = $false
 $init = $true
 while ($true) {
     $previous = @{
@@ -198,7 +197,7 @@ while ($true) {
 
     $content = Get-Leaderboard -CallApi $live -Year $year -Session $session -LeaderboardId $leaderboard
 
-    $members = Get-ObjectValues $content.members | Sort-Object -Descending -Property local_score
+    $members = Get-ObjectValues $content.members | Sort-Object -Descending -Property local_score,last_star_ts
     $participants = $members  | Where-Object { $_.local_score -gt 0 } 
     
     $indexPadding = [math]::max(2, "$($participants.Length)".Length)
@@ -224,16 +223,29 @@ while ($true) {
         }
     }
 
-    if ($send_leaderboard_update -and $anyUpdate) {
+    if ($send_leaderboard_update) {
         $now = Get-Date
-        foreach ($leaderboardTime in $leaderboardTimes) {
-            $leaderBoardRefresh = [datetime]::parse($leaderboardTime).ToLocalTime()
-            if ($now -lt $leaderBoardRefresh -and ($now.AddSeconds($timeout) -gt $leaderBoardRefresh)) {
-                Send-SlackMessage (Get-ScoreBoard)
+
+        $lastStarGained = $participants | Sort-Object -Property last_star_ts -Descending | Select-Object -First 1 -ExpandProperty last_star_ts
+        if($null -eq $lastStarGained) {
+            $lastStarGained = 0
+        }
+        $lastStarGainedTime = $epoch.AddSeconds($lastStarGained).ToLocalTime()
+
+        $times = $leaderboardTimes | Foreach-Object { [datetime]::parse($_).ToLocalTime() } | Sort-Object
+
+        for($i = 0; $i -lt $times.Length; $i++) {
+            $leaderBoardRefresh = $times[$i]
+            if ($now -le $leaderBoardRefresh -and ($now.AddSeconds($timeout) -ge $leaderBoardRefresh)) {
+                $previousTime = $times[($i - 1) % $times.Length]
+                if($previousTime -gt $now) { $previousTime.AddDays(-1) }
+
+                if($lastStarGainedTime -gt $previousTime) {
+                    Send-SlackMessage (Get-ScoreBoard)
+                }
                 break
             }
         }
-        $anyUpdate = $false
     }
 
     # $gainedStars = @(@{ name = "", day = 1, part = 1, time = 10:32 })
@@ -270,7 +282,6 @@ while ($true) {
     }
 
     if ($gainedStars.Length -gt 0) {
-        $anyUpdate = $true
         $message = [System.Collections.ArrayList]::new()
         $gainedStars | Sort-Object -Property time | ForEach-Object {
             $gained = $_
